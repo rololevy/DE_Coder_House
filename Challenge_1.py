@@ -1,9 +1,8 @@
 import pandas as pd
 import requests
-import time
-import json
 import psycopg2
 from sqlalchemy import create_engine
+from datetime import datetime
 
 # Realizar la solicitud GET a la API para obtener la lista de personajes
 url = 'https://rickandmortyapi.com/api/character'
@@ -20,53 +19,53 @@ if response.status_code == 200:
     # Crear una lista para almacenar la información detallada de cada personaje
     lista_detalles_personajes = []
 
-    # Simular una limpieza de datos y agregar el timestamp a cada personaje
-    current_timestamp = int(time.time())  # Obtener el timestamp actual en segundos
+    # Iterar sobre la lista de personajes y obtener información detallada de cada uno
     for personaje in personajes:
-        # Simulación de limpieza de datos
-        personaje['species'] = personaje['species'].replace('Unknown', 'N/A')
-        personaje['type'] = personaje['type'].replace('Unknown', 'N/A')
-        # Convertir diccionarios a strings en las columnas 'origin' y 'location'
-    
-        # Agregar el timestamp al personaje
-        personaje['timestamp'] = current_timestamp
-
-        # Agregar el personaje a la lista
-        lista_detalles_personajes.append(personaje)
+        url_personaje = personaje['url']
+        response_personaje = requests.get(url_personaje)
+        if response_personaje.status_code == 200:
+            detalle_personaje = response_personaje.json()
+            lista_detalles_personajes.append(detalle_personaje)
+        else:
+            print('Error en la solicitud del personaje:', personaje['name'])
 
     # Crear un DataFrame de Pandas a partir de la lista de diccionarios con los detalles de los personajes
     df = pd.DataFrame.from_records(lista_detalles_personajes)
 
-    # Mostrar las columnas del DataFrame
-    print(df.columns)
+    # Realizar la limpieza de datos y eliminar duplicados
+    df_cleaned = df.drop_duplicates(subset=['name', 'species', 'type'], keep='last')
 
-    df['origin'] = df['origin'].apply(json.dumps)
-    df['location'] = df['location'].apply(json.dumps)
-    df['origin'] = df['origin'].astype(str)
-    df['location'] = df['location'].astype(str)
+    # Convertir el campo 'created' a formato de fecha y hora
+    df_cleaned['created'] = pd.to_datetime(df_cleaned['created'])
 
-    # Mostrar el DataFrame
-    print(df)
+    # Identificar las columnas problemáticas que generan el error "standard_conforming_strings"
+    problematic_columns = ['origin', 'location', 'episode','url','image']
 
-    # Guardar el DataFrame en un archivo CSV
-    df.to_csv('rick_and_morty_characters.csv', index=False)
-    
-    # Insertar los datos en la base de datos (utilizando Pandas y SQLAlchemy)
+    # Eliminar las columnas problemáticas del DataFrame df_cleaned
+    df_cleaned = df_cleaned.drop(columns=problematic_columns)
+
+    # Mostrar el DataFrame limpio
+    print(df_cleaned)
+
+    # Guardar el DataFrame limpio en un archivo CSV
+    df_cleaned.to_csv('rick_and_morty_characters_cleaned.csv', index=False)
+
 
     connection_params = {
-        "dbname": " ",
-        "user": "",
-        "password": "",
-        "host": "",
-        "port": ""
-    }
+    'dbname': 'd,
+    'user': 'o',
+    'password': '',
+    'host': 'd',
+    'port': ''
+}
 
+    # Insertar los datos limpios en la base de datos (utilizando Pandas y SQLAlchemy)
     engine = create_engine(
-        f"postgresql+psycopg2://{connection_params['user']}:{connection_params['password']}@{connection_params['host']}:{connection_params['port']}/{connection_params['dbname']}",
-        connect_args={"sslmode": "require"}
+        f"postgresql+psycopg2://{connection_params['user']}:{connection_params['password']}@{connection_params['host']}:{connection_params['port']}/{connection_params['dbname']}"
     )
-    
-    df.to_sql('rick_and_morty_v3', engine, if_exists='append', index=False)
+
+    df_cleaned.to_sql('rick_and_morty_v3', engine, if_exists='append', index=False)
+
 
     print("Datos insertados exitosamente en la tabla.")
 else:
