@@ -46,11 +46,11 @@ def main():
         df_cleaned.to_csv('rick_and_morty_characters_cleaned.csv', index=False)
 
         connection_params = {
-            'dbname': 'data-engineer-database',
-            'user': 'o_oaguilera_coderhouse',
-            'password': 'lVUM508vJ9',
-            'host': 'data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com',
-            'port': '5439'
+            'dbname': '',
+            'user': '',
+            'password': '',
+            'host': '',
+            'port': ''
         }
         insert_data_into_redshift(df_cleaned, connection_params)
 
