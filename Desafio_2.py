@@ -6,14 +6,19 @@ import psycopg2
 from sqlalchemy import create_engine, types
 from datetime import datetime
 
-def get_character_data(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        datos_json = response.json()
-        return datos_json['results']
-    else:
-        print('Error en la solicitud:', response.status_code)
-        return None
+def get_character_data(url, num_pages=1):
+    all_results = []  # Lista para almacenar los resultados de todas las páginas
+
+    for page in range(1, num_pages + 1):
+        response = requests.get(url, params={'page': page})
+        if response.status_code == 200:
+            datos_json = response.json()
+            results = datos_json['results']
+            all_results.extend(results)  # Agregar los resultados de la página actual a la lista
+        else:
+            print('Error en la solicitud:', response.status_code)
+
+    return all_results
 
 def clean_character_data(data):
     df = pd.DataFrame.from_records(data)
