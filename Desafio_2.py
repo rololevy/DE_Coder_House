@@ -1,6 +1,9 @@
 import pandas as pd
 import requests
-from sqlalchemy import create_engine
+import time
+import json
+import psycopg2
+from sqlalchemy import create_engine, types
 from datetime import datetime
 
 def get_character_data(url):
