@@ -12,3 +12,7 @@ ALTER TABLE rick_and_morty_v3 DROP COLUMN "url";
 
 -- Finalmente, eliminar la columna 'image'
 ALTER TABLE rick_and_morty_v3 DROP COLUMN "image";
+
+-- Agregamos Primary Key
+ALTER TABLE rick_and_morty_v3
+ADD CONSTRAINT pk_rick_and_morty_v3 PRIMARY KEY (id);
