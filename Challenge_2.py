@@ -35,7 +35,7 @@ def insert_data_into_redshift(df_cleaned, connection_params):
     engine = create_engine(
         f"postgresql+psycopg2://{connection_params['user']}:{connection_params['password']}@{connection_params['host']}:{connection_params['port']}/{connection_params['dbname']}"
     )
-    df_cleaned.to_sql('rick_and_morty_v6', engine, if_exists='append', index=False)
+    df_cleaned.to_sql('rick_and_morty_v6', engine, if_exists='append', index=False, schema= connection_params['user'])
 
 def main():
     url = 'https://rickandmortyapi.com/api/character'
